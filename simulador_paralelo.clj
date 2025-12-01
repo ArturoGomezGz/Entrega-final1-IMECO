@@ -38,12 +38,6 @@
       (println (str "Error al leer el archivo '" archivo "': " (.getMessage e)))
       nil)))
 
-(defn leer-maquina [archivo]
-  (leer-archivo-completo archivo))
-
-(defn leer-transacciones [archivo]
-  (leer-archivo-completo archivo))
-
 ;; ------------------------------
 ;; Funciones para manejar dinero
 ;; ------------------------------
@@ -72,12 +66,6 @@
       0
       (+ (* (first (first denominaciones)) (second (first denominaciones)))
          (calcular-total-denominaciones (rest denominaciones)))))
-
-(defn calcular-total-lista-individual [lista-denominaciones]
-  (if (empty? lista-denominaciones)
-      0
-      (+ (first lista-denominaciones) 
-         (calcular-total-lista-individual (rest lista-denominaciones)))))
 
 (defn obtener-dinero [maquina]
   (:dinero maquina))
@@ -196,18 +184,10 @@
             (assoc productos-mapa slot [(first producto) (+ (second producto) valor)])
             productos-mapa))))
 
-(defn actualizar-inventario-restar [maquina slot valor]
-  {:productos (actualizar-lista-restar (:productos maquina) slot valor)
-   :dinero (obtener-dinero maquina)
-   :ganancia (:ganancia maquina 0)})
-
 (defn actualizar-inventario-sumar [maquina slot valor]
   {:productos (actualizar-lista-sumar (:productos maquina) slot valor)
    :dinero (obtener-dinero maquina)
    :ganancia (:ganancia maquina 0)})
-
-(defn actualizar-inventario [maquina slot valor]
-  (actualizar-inventario-restar maquina slot valor))
 
 (defn actualizar-maquina-despues-venta [maquina slot nuevo-inventario-dinero precio]
   {:productos (actualizar-lista-restar (:productos maquina) slot 1)
@@ -238,27 +218,6 @@
 (defn mostrar-cambio [cambio monto-total]
   (println (str "Cambio: $" monto-total))
   (mostrar-detalle-cambio cambio))
-
-(defn imprimir-inventario-dinero [inventario-dinero]
-  (if (empty? inventario-dinero)
-      (println "Fin del inventario de dinero.")
-      (do
-        (println (str
-                  "$" (first (first inventario-dinero))
-                  ": " (second (first inventario-dinero))
-                  " unidades"))
-        (imprimir-inventario-dinero (rest inventario-dinero)))))
-
-(defn imprimir-inventario [productos]
-  (if (empty? productos)
-      (println "Fin del inventario.")
-      (do
-        (doseq [[slot producto-info] productos]
-          (println (str
-                    (name slot)
-                    ": " (nth producto-info 1)
-                    " unidades restantes.")))
-        (println "Fin del inventario."))))
 
 ;; ------------------------------
 ;; Conversión de estructuras
@@ -384,28 +343,16 @@
 ;; Gestión de múltiples máquinas
 ;; ------------------------------
 
-(defn crear-maquina [id archivo-configuracion]
-  "Crea una máquina con un ID único y la carga desde un archivo de configuración"
-  (let [maquina-raw (leer-maquina archivo-configuracion)
-        maquina (convertir-estructura-racket maquina-raw)]
-    (swap! maquinas-estado assoc id maquina)
-    id))
-
-(defn obtener-maquina [id]
-  "Obtiene el estado actual de una máquina por su ID"
-  (get @maquinas-estado id))
-
-(defn actualizar-maquina [id nueva-maquina]
-  "Actualiza el estado de una máquina"
-  (swap! maquinas-estado assoc id nueva-maquina))
-
-(defn obtener-todas-maquinas []
-  "Retorna un mapa con todas las máquinas"
-  @maquinas-estado)
-
 ;; ------------------------------
 ;; Lectura de configuración de múltiples máquinas
 ;; ------------------------------
+
+(defn crear-maquina [id archivo-configuracion]
+  "Crea una máquina con un ID único y la carga desde un archivo de configuración"
+  (let [maquina-raw (leer-archivo-completo archivo-configuracion)
+        maquina (convertir-estructura-racket maquina-raw)]
+    (swap! maquinas-estado assoc id maquina)
+    id))
 
 (defn leer-configuracion-maquinas [archivo-config]
   "Lee el archivo de configuración que define las máquinas y sus archivos de config
