@@ -1,0 +1,9 @@
+(
+  (venta A1 (20))
+  (venta B2 (10 20))
+  (resurtir B2 2)
+  (venta B2 (50))
+  (venta A2 (10 10 5))
+  (venta B1 (5 5 5))
+  (retiro-dinero (100))
+)
