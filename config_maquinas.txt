@@ -1,0 +1,5 @@
+(
+  (maquina1 "maquina1.txt")
+  (maquina2 "maquina2.txt")
+  (maquina3 "maquina3.txt")
+)
