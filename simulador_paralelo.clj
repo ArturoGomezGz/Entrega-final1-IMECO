@@ -577,29 +577,5 @@
           ;; Mostrar resultados
           (mostrar-resultados-finales))))))
 
-;; ------------------------------
-;; Modo de demostración (sin entrada de usuario)
-;; ------------------------------
-
-(defn demo []
-  "Ejecuta una demostración con archivos de configuración predefinidos"
-  (println "=== Simulador de Máquinas Expendedoras en Paralelo (Demo) ===")
-  
-  ;; Inicializar máquinas
-  (let [configuraciones [['maquina1 "maquina1.txt"]
-                         ['maquina2 "maquina2.txt"]
-                         ['maquina3 "maquina3.txt"]]]
-    (inicializar-maquinas configuraciones)
-    
-    ;; Leer y procesar transacciones
-    (let [transacciones-raw (leer-transacciones-multiples "transacciones_multiples.txt")
-          transacciones-por-maquina (agrupar-transacciones-por-maquina transacciones-raw)]
-      
-      ;; Procesar en paralelo
-      (procesar-todas-maquinas-paralelo transacciones-por-maquina)
-      
-      ;; Mostrar resultados
-      (mostrar-resultados-finales))))
-
 ;; Ejecutar programa
 (main-paralelo)
