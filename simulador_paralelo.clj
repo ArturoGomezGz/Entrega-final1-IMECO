@@ -12,6 +12,8 @@
 ;; Constantes de configuración
 ;; ------------------------------
 
+;; Se prefiere definir estos valores como constantes globales para facilitar su ajuste
+
 ;; Punto de reorden para productos (cuando el stock baja a este nivel o menos, se necesita resurtido)
 (def punto-reorden-producto 2)
 
