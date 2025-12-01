@@ -1,0 +1,20 @@
+(
+  (maquina1
+    (venta A1 (20))
+    (venta B1 (10 5))
+    (venta A2 (20 10))
+    (resurtir B2 3)
+    (venta B2 (50)))
+  (maquina2
+    (venta A1 (20))
+    (venta A2 (20))
+    (venta B1 (10))
+    (venta B2 (50))
+    (retiro-dinero (100)))
+  (maquina3
+    (venta A1 (50))
+    (venta B1 (20))
+    (venta A2 (50))
+    (venta B2 (50))
+    (resurtir A1 5))
+)
