@@ -325,11 +325,13 @@
        (rest transacciones))))
 
 ;; ==============================
-;; SECCIÓN NUEVA: MÚLTIPLES MÁQUINAS EN PARALELO
+;; MÚLTIPLES MÁQUINAS EN PARALELO
 ;; ==============================
 
 ;; Almacén de todas las máquinas usando un atom para gestión de estado concurrente
 (def maquinas-estado (atom {}))
+
+;; ESTA SECCION FUE HECHA CON AI PARA MEJORAR LA SINCRONIZACION DE SALIDA EN PARALELO ----------------
 
 ;; Lock para sincronizar la salida a consola durante procesamiento paralelo
 (def print-lock (Object.))
@@ -339,9 +341,7 @@
   (locking print-lock
     (apply println args)))
 
-;; ------------------------------
-;; Gestión de múltiples máquinas
-;; ------------------------------
+;; ----------------------------------------------------------------------------------------------------
 
 ;; ------------------------------
 ;; Lectura de configuración de múltiples máquinas
