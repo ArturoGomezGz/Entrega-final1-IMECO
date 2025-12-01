@@ -26,8 +26,17 @@
 ;; ------------------------------
 
 (defn leer-archivo-completo [archivo]
-  (with-open [reader (clojure.java.io/reader archivo)]
-    (read (java.io.PushbackReader. reader))))
+  "Lee un archivo y lo convierte a estructura de datos Clojure.
+   Maneja errores si el archivo no existe o tiene formato inválido."
+  (try
+    (with-open [reader (clojure.java.io/reader archivo)]
+      (read (java.io.PushbackReader. reader)))
+    (catch java.io.FileNotFoundException e
+      (println (str "Error: No se encontró el archivo '" archivo "'"))
+      nil)
+    (catch Exception e
+      (println (str "Error al leer el archivo '" archivo "': " (.getMessage e)))
+      nil)))
 
 (defn leer-maquina [archivo]
   (leer-archivo-completo archivo))
@@ -170,11 +179,13 @@
 ;; ------------------------------
 
 (defn actualizar-lista-restar [productos-mapa slot valor]
+  "Resta valor de un producto, asegurando que no quede negativo"
   (if (empty? productos-mapa)
       {}
       (let [producto (get productos-mapa slot)]
         (if producto
-            (assoc productos-mapa slot [(first producto) (- (second producto) valor)])
+            (let [nueva-cantidad (- (second producto) valor)]
+              (assoc productos-mapa slot [(first producto) (max 0 nueva-cantidad)]))
             productos-mapa))))
 
 (defn actualizar-lista-sumar [productos-mapa slot valor]
@@ -361,6 +372,14 @@
 ;; Almacén de todas las máquinas usando un atom para gestión de estado concurrente
 (def maquinas-estado (atom {}))
 
+;; Lock para sincronizar la salida a consola durante procesamiento paralelo
+(def print-lock (Object.))
+
+(defn println-sync [& args]
+  "Imprime a consola de forma sincronizada para evitar output entrelazado"
+  (locking print-lock
+    (apply println args)))
+
 ;; ------------------------------
 ;; Gestión de múltiples máquinas
 ;; ------------------------------
@@ -425,13 +444,19 @@
 ;; ------------------------------
 
 (defn procesar-maquina-transacciones [id transacciones]
-  "Procesa todas las transacciones de una máquina específica
-   Retorna el ID y el nuevo estado de la máquina"
-  (println (str "\n=== Procesando Máquina: " id " ==="))
-  (let [maquina-actual (obtener-maquina id)
-        maquina-final (procesar-transacciones maquina-actual transacciones)]
-    (actualizar-maquina id maquina-final)
-    [id maquina-final]))
+  "Procesa todas las transacciones de una máquina específica.
+   Captura el output y lo imprime de forma sincronizada para evitar mezclas."
+  (let [maquina-actual (get @maquinas-estado id)
+        output-and-result (with-out-str
+                            (println (str "=== Procesando Máquina: " id " ==="))
+                            (let [maquina-final (procesar-transacciones maquina-actual transacciones)]
+                              (swap! maquinas-estado assoc id maquina-final)
+                              (print "::RESULT::" maquina-final)))]
+    ;; Extraer resultado del output capturado
+    (let [result-idx (.indexOf output-and-result "::RESULT::")
+          output (subs output-and-result 0 result-idx)]
+      (println-sync output)
+      [id (get @maquinas-estado id)])))
 
 (defn procesar-todas-maquinas-paralelo [transacciones-por-maquina]
   "Procesa las transacciones de todas las máquinas en paralelo usando pmap"
